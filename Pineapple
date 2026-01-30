@@ -1,0 +1,54 @@
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local flying = false
+local bv, bg
+local flyConn, noclipConn
+local minimized = false
+
+-- UI
+local gui = Instance.new("ScreenGui")
+gui.Name = "FlyNoClipUI"
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 170, 0, 210)
+frame.Position = UDim2.new(0, 20, 0.35, 0)
+frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
+frame.BorderSizePixel = 0
+frame.Active = true
+frame.Draggable = true
+
+-- Header
+local header = Instance.new("TextButton", frame)
+header.Size = UDim2.new(1, 0, 0, 30)
+header.Text = "–  CONTROLS"
+header.TextScaled = true
+header.BackgroundColor3 = Color3.fromRGB(40,40,40)
+header.BorderSizePixel = 0
+
+-- Buttons
+local function makeButton(text, y, color)
+	local b = Instance.new("TextButton", frame)
+	b.Size = UDim2.new(1, 0, 0, 45)
+	b.Position = UDim2.new(0, 0, 0, y)
+	b.Text = text
+	b.TextScaled = true
+	b.BackgroundColor3 = color
+	b.BorderSizePixel = 0
+	return b
+end
+
+local flyBtn    = makeButton("FLY",    30,  Color3.fromRGB(60,200,60))
+local unflyBtn  = makeButton("UNFLY",  75,  Color3.fromRGB(200,60,60))
+local noclipBtn = makeButton("NOCLIP", 120, Color3.fromRGB(70,70,200))
+local clipBtn   = makeButton("CLIP",   165, Color3.fromRGB(220,150,60))
+
+-- Minimize logic
+header.MouseButton1Click:Connect(function()
+	minimized = not minimized
+	if minimized then
+		header.Text = "+  CONTROLS"
+		frame.Size = UDim2.new(0
