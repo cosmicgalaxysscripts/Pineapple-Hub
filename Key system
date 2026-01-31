@@ -1,0 +1,129 @@
+-- SERVICES
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+
+-- CONFIG
+local GET_KEY_LINK = "https://work.ink/2gQM/pineapple-hub"
+local VERIFY_KEY_API = "https://your-site.com/verify?key="
+
+local player = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "KeyLoader"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.fromScale(0.4, 0.4)
+main.Position = UDim2.fromScale(0.3, 0.3)
+main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+main.BorderSizePixel = 0
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+-- Title
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.fromScale(1, 0.12)
+title.Text = "Universal Script Loader"
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(0, 255, 140)
+title.Font = Enum.Font.Code
+title.TextSize = 22
+
+-- Key box
+local box = Instance.new("TextBox", main)
+box.Size = UDim2.fromScale(0.9, 0.18)
+box.Position = UDim2.fromScale(0.05, 0.22)
+box.PlaceholderText = "Enter key..."
+box.ClearTextOnFocus = false
+box.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+box.TextColor3 = Color3.new(1,1,1)
+box.Font = Enum.Font.Code
+box.TextSize = 16
+Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+
+-- Check button
+local check = Instance.new("TextButton", main)
+check.Size = UDim2.fromScale(0.9, 0.18)
+check.Position = UDim2.fromScale(0.05, 0.45)
+check.Text = "Check Key"
+check.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+check.TextColor3 = Color3.fromRGB(0, 255, 140)
+check.Font = Enum.Font.Code
+check.TextSize = 18
+Instance.new("UICorner", check).CornerRadius = UDim.new(0, 6)
+
+-- Get key button
+local getKey = Instance.new("TextButton", main)
+getKey.Size = UDim2.fromScale(0.9, 0.15)
+getKey.Position = UDim2.fromScale(0.05, 0.67)
+getKey.Text = "Get Key"
+getKey.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+getKey.TextColor3 = Color3.fromRGB(120, 120, 255)
+getKey.Font = Enum.Font.Code
+getKey.TextSize = 16
+Instance.new("UICorner", getKey).CornerRadius = UDim.new(0, 6)
+
+-- Status
+local status = Instance.new("TextLabel", main)
+status.Size = UDim2.fromScale(1, 0.1)
+status.Position = UDim2.fromScale(0, 0.85)
+status.BackgroundTransparency = 1
+status.Text = ""
+status.Font = Enum.Font.Code
+status.TextSize = 15
+status.TextColor3 = Color3.fromRGB(180, 180, 180)
+
+-- 🔐 REMOTE KEY VERIFICATION
+local function verifyKey(key)
+	local success, response = pcall(function()
+		return HttpService:GetAsync(VERIFY_KEY_API .. HttpService:UrlEncode(key))
+	end)
+
+	if not success then
+		return false
+	end
+
+	return response == "VALID"
+end
+
+-- CHECK KEY BUTTON
+check.MouseButton1Click:Connect(function()
+	status.TextColor3 = Color3.fromRGB(180,180,180)
+	status.Text = "Checking key..."
+	check.Active = false
+
+	if verifyKey(box.Text) then
+		status.TextColor3 = Color3.fromRGB(0,255,140)
+		status.Text = "Key valid. Loading..."
+		task.wait(1)
+		gui:Destroy()
+
+		-- 🔥 YOUR SCRIPT STARTS HERE 🔥
+		print("Script running!")
+
+	else
+		status.TextColor3 = Color3.fromRGB(255,80,80)
+		status.Text = "Invalid key"
+		box.Text = ""
+	end
+
+	check.Active = true
+end)
+
+-- GET KEY BUTTON (AUTO COPY)
+getKey.MouseButton1Click:Connect(function()
+	box.Text = GET_KEY_LINK
+	box:CaptureFocus()
+	box.SelectionStart = 0
+	box.CursorPosition = #box.Text + 1
+
+	if setclipboard then
+		setclipboard(GET_KEY_LINK)
+		status.TextColor3 = Color3.fromRGB(0,255,140)
+		status.Text = "Key link copied to clipboard!"
+	else
+		status.TextColor3 = Color3.fromRGB(180,180,180)
+		status.Text = "Press Ctrl + C to copy"
+	end
+end)
