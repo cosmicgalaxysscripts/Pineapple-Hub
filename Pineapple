@@ -1,54 +1,137 @@
-local Players = game:GetService("Players")
+-- FAKE EXPLOIT UI (IMAGE FAILSAFE FIX)
+-- UI ONLY
+
+local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
+local ContentProvider = game:GetService("ContentProvider")
 
-local player = Players.LocalPlayer
-local flying = false
-local bv, bg
-local flyConn, noclipConn
-local minimized = false
+-- IMAGE IDS
+local PRIMARY_IMAGE = "rbxassetid://2709979715" -- your image (may be blocked)
+local FALLBACK_IMAGE = "rbxassetid://7074764"  -- guaranteed working
 
--- UI
+-- MAIN GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "FlyNoClipUI"
+gui.Name = "TotallyRealExploit"
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+gui.DisplayOrder = 999
 gui.Parent = player:WaitForChild("PlayerGui")
 
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0, 170, 0, 210)
-frame.Position = UDim2.new(0, 20, 0.35, 0)
+-- MAIN FRAME
+local frame = Instance.new("Frame")
+frame.Size = UDim2.fromScale(0.35, 0.45)
+frame.Position = UDim2.fromScale(0.325, 0.275)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
-frame.BorderSizePixel = 0
-frame.Active = true
-frame.Draggable = true
+frame.ZIndex = 1
+frame.Parent = gui
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0,12)
 
--- Header
-local header = Instance.new("TextButton", frame)
-header.Size = UDim2.new(1, 0, 0, 30)
-header.Text = "–  CONTROLS"
-header.TextScaled = true
-header.BackgroundColor3 = Color3.fromRGB(40,40,40)
-header.BorderSizePixel = 0
+-- TITLE BAR (DRAG)
+local title = Instance.new("TextLabel")
+title.Size = UDim2.fromScale(1,0.15)
+title.BackgroundColor3 = Color3.fromRGB(18,18,18)
+title.Text = "🔥 BEST OP UNIVERSAL EXPLOIT 🔥"
+title.TextColor3 = Color3.fromRGB(255,80,80)
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.ZIndex = 2
+title.Parent = frame
+Instance.new("UICorner", title).CornerRadius = UDim.new(0,12)
 
--- Buttons
-local function makeButton(text, y, color)
-	local b = Instance.new("TextButton", frame)
-	b.Size = UDim2.new(1, 0, 0, 45)
-	b.Position = UDim2.new(0, 0, 0, y)
-	b.Text = text
-	b.TextScaled = true
-	b.BackgroundColor3 = color
-	b.BorderSizePixel = 0
-	return b
+-- DRAG LOGIC
+local dragging, dragStart, startPos
+
+title.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = frame.Position
+	end
+end)
+
+title.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		frame.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+-- JUMPSCARE FUNCTION (FIXED)
+local function hackedScreen()
+	if gui:FindFirstChild("HACKED") then return end
+
+	local hacked = Instance.new("Frame")
+	hacked.Name = "HACKED"
+	hacked.Size = UDim2.fromScale(1,1)
+	hacked.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	hacked.ZIndex = 100
+	hacked.Parent = gui
+
+	-- IMAGE LABEL
+	local img = Instance.new("ImageLabel")
+	img.Size = UDim2.fromScale(1,1)
+	img.BackgroundTransparency = 1
+	img.ScaleType = Enum.ScaleType.Stretch
+	img.ZIndex = 101
+	img.Parent = hacked
+
+	-- TRY PRIMARY IMAGE, FALL BACK IF BLOCKED
+	local success = pcall(function()
+		ContentProvider:PreloadAsync({PRIMARY_IMAGE})
+	end)
+
+	if success then
+		img.Image = PRIMARY_IMAGE
+	else
+		img.Image = FALLBACK_IMAGE
+	end
+
+	-- LOOPING SOUND
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://5710016194"
+	sound.Volume = 5
+	sound.Looped = true
+	sound.Parent = hacked
+	sound:Play()
 end
 
-local flyBtn    = makeButton("FLY",    30,  Color3.fromRGB(60,200,60))
-local unflyBtn  = makeButton("UNFLY",  75,  Color3.fromRGB(200,60,60))
-local noclipBtn = makeButton("NOCLIP", 120, Color3.fromRGB(70,70,200))
-local clipBtn   = makeButton("CLIP",   165, Color3.fromRGB(220,150,60))
+-- BUTTON CREATOR
+local function makeButton(text, yPos)
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.fromScale(0.8,0.11)
+	btn.Position = UDim2.fromScale(0.1,yPos)
+	btn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	btn.Text = text
+	btn.TextColor3 = Color3.new(1,1,1)
+	btn.Font = Enum.Font.GothamBold
+	btn.TextScaled = true
+	btn.ZIndex = 2
+	btn.Parent = frame
+	Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
 
--- Minimize logic
-header.MouseButton1Click:Connect(function()
-	minimized = not minimized
-	if minimized then
-		header.Text = "+  CONTROLS"
-		frame.Size = UDim2.new(0
+	btn.MouseButton1Click:Connect(function()
+		hackedScreen()
+	end)
+end
+
+-- BUTTONS
+makeButton("Teleport", 0.20)
+makeButton("Invisible", 0.33)
+makeButton("Noclip", 0.46)
+makeButton("Fly", 0.59)
+makeButton("Kill All", 0.72)
+makeButton("Fling All", 0.85)
+
+print("Fake exploit loaded (image failsafe active)")
